@@ -1,24 +1,18 @@
-const { MongoClient } = require('mongodb');
-const fs = require('fs');
+const mongoose = require("mongoose")
 
-const credentials = 'X509-cert-4605733447081447211.pem'
-const client = new MongoClient('mongodb+srv://cluster0.v8lzu.mongodb.net/myFirstDatabase?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority', {
-  sslKey: credentials,
-  sslCert: credentials
-});
+const initDB = (callback, onError) => {
+  const uri = "mongodb+srv://absence:jzhMGzTiwzBsUkgC@cluster0.v8lzu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+  mongoose.connect(uri)
 
-async function run() {
-  try {
-    await client.connect();
-    const database = client.db("testDB");
-    const collection = database.collection("testCol");
-    const docCount = await collection.countDocuments({});
-    console.log(docCount);
-    // perform actions using client
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
+  const db = mongoose.connection
+
+  db.on('error', err => {
+    onError?.(err)
+  })
+
+  db.once('open', () => {
+    callback?.()
+  })
 }
 
-run().catch(console.dir);
+module.exports = initDB
