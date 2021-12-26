@@ -4,7 +4,7 @@ const AnswerSchema = require("./answer")
 
 const QuizzSchema = new Schema({
   title: String,
-  user: Number,
+  user: { type: Schema.Types.ObjectId, ref: 'user' },
   questions: [{
     title: String,
     multipleChoice: Boolean,
