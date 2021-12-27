@@ -1,13 +1,14 @@
 const express = require("express")
 const db = require("./mongo/config")
-const { get: getUser, create: createUser } = require("./controllers/users")
+const passport = require("passport")
+const cookieParser = require("cookie-parser")
+const session = require("express-session")
+
+const { get: getUser, create: createUser, put: updateUser } = require("./controllers/users")
 const { create: createQuizz, put: updateQuizz, get: getQuizz, } = require("./controllers/quizz")
 const { create: createTakeQuizz, get: getTakeQuizz } = require("./controllers/takeQuizz")
 const { errorHandler, errorUse } = require('./middlewares/errorHandler')
 const { initializePassport, ensureAuthenticated } = require('./middlewares/passport')
-const passport = require("passport")
-const cookieParser = require("cookie-parser")
-const session = require("express-session")
 
 console.debug("=====================================")
 
@@ -34,6 +35,7 @@ initializePassport(passport)
 
 app.get("/user", ensureAuthenticated, errorHandler(getUser))
 app.post("/user", errorHandler(createUser))
+app.put("/user", ensureAuthenticated, errorHandler(updateUser))
 app.post("/login", passport.authenticate("local"), (req, res) => res.status(200).json(req.user.token))
 
 app.get("/quizz/:id?", ensureAuthenticated, errorHandler(getQuizz))
