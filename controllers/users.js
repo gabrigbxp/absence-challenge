@@ -14,13 +14,13 @@ const create = async (req, res, next) => {
   })
 
   user.save(err => {
-    if (err) return next(err.code === 11000 ? new BusinessError(500, "User already exists") : err)
+    if (err) return next(err.code === 11000 ? new BusinessError(400, "User already exists") : err)
     res.status(200).json(user)
   })
 }
 
 const login = async (username, password, done) => {
-  const e404 = new BusinessError(404, "Wrong user or password")
+  const e404 = new BusinessError(400, "Wrong user or password")
   User.findOne({ username }, (err, user) => {
     if (err) return done(err, false)
 
@@ -36,7 +36,6 @@ const login = async (username, password, done) => {
 }
 
 const findByToken = async (token, done) => {
-  const e404 = new BusinessError(404, "Wrong user or password")
   User.findOne({ token }, (err, user) => {
     if (err) return done(err, false)
 
