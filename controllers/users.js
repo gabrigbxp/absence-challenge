@@ -1,6 +1,10 @@
 const User = require("../models/users")
 const BusinessError = require("../errors/BusinessError")
 
+const get = async (req, res) => {
+  res.status(200).json(req.user)
+}
+
 const create = async (req, res, next) => {
   const { username, password } = req.body
 
@@ -40,4 +44,4 @@ const findByToken = async (token, done) => {
   })
 }
 
-module.exports = { create, login, findByToken }
+module.exports = { get, create, login, findByToken }
