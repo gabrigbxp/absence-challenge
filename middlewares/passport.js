@@ -1,10 +1,15 @@
+require('dotenv').config();
 const { errorHandler } = require('./errorHandler')
-const Strategy = require("passport-local")
-const { login, findByToken: findUserByToken } = require("../controllers/users")
-const AuthenticationError = require('../errors/AuthenticationError')
+const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
+const { strategyLogin, findByToken: findUserByToken } = require("../controllers/users")
+
+const opts = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET,
+}
 
 const initializePassport = passport => {
-  passport.use(new Strategy(errorHandler(login)))
+  passport.use(new JwtStrategy(opts, errorHandler(strategyLogin)))
 
   passport.serializeUser((user, done) => {
     done(null, user.token)
@@ -13,9 +18,4 @@ const initializePassport = passport => {
   passport.deserializeUser(findUserByToken)
 }
 
-const ensureAuthenticated = (req, _res, done) => {
-  if (req.isAuthenticated()) return done()
-  else done(new AuthenticationError("No session"))
-}
-
-module.exports = { initializePassport, ensureAuthenticated }
+module.exports = initializePassport

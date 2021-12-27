@@ -1,9 +1,11 @@
+require('dotenv').config();
+const jwt = require('jsonwebtoken')
 const User = require("../models/users")
 const BusinessError = require("../errors/BusinessError")
 const encrypt = require("../utils/encrypt")
 
 const get = async (req, res) => {
-  res.status(200).json(req.user)
+  res.status(200).json({ _id: req.user._id, username: req.user.username })
 }
 
 const create = async (req, res, next) => {
@@ -34,19 +36,30 @@ const put = async (req, res, next) => {
     })
 }
 
-const login = async (username, password, done) => {
-  const e404 = new BusinessError(400, "Wrong user or password")
+const login = async (req, res, next) => {
+  const { username, password } = req.body
   User.findOne({ username }, (err, user) => {
-    if (err) return done(err, false)
+    if (err) return next(err)
 
-    !user ? done(e404, false) : user.comparePassword(password, (err, isMatch) => {
-      if (err) return done(err, false)
+    !user ? next(e404) : user.comparePassword(password, (err, isMatch) => {
+      if (err) return next(err)
 
       if (isMatch) {
-        user.token = "ThisIsTokenWithExpirationDate"
-        user.save(err => done(err, user ?? false))
-      } else done(e404, false)
+        const payload = { id: user._id, username };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+        user.token = token
+        user.save(err => err ? next(err) : res.status(200).json({ token }))
+      } else {
+        next(e404)
+      }
     })
+  })
+}
+
+const strategyLogin = async (jwt_payload, done) => {
+  User.findOne({ _id: jwt_payload.id, username: jwt_payload.username }, (err, user) => {
+    done(err, user ?? false)
   })
 }
 
@@ -54,8 +67,8 @@ const findByToken = async (token, done) => {
   User.findOne({ token }, (err, user) => {
     if (err) return done(err, false)
 
-    done(null, user ? { _id: user._id, username: user.username, token: user.token } : false)
+    done(null, user ?? false)
   })
 }
 
-module.exports = { get, create, put, login, findByToken }
+module.exports = { get, create, put, login, strategyLogin, findByToken }

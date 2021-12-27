@@ -1,14 +1,12 @@
 const express = require("express")
 const db = require("./mongo/config")
 const passport = require("passport")
-const cookieParser = require("cookie-parser")
-const session = require("express-session")
 
-const { get: getUser, create: createUser, put: updateUser } = require("./controllers/users")
+const { get: getUser, create: createUser, login: loginUser, put: updateUser } = require("./controllers/users")
 const { create: createQuizz, put: updateQuizz, get: getQuizz, } = require("./controllers/quizz")
 const { create: createTakeQuizz, get: getTakeQuizz } = require("./controllers/takeQuizz")
 const { errorHandler, errorUse } = require('./middlewares/errorHandler')
-const { initializePassport, ensureAuthenticated } = require('./middlewares/passport')
+const initializePassport = require('./middlewares/passport')
 
 console.debug("=====================================")
 
@@ -17,33 +15,21 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use(cookieParser())
-
-app.use(
-  session({
-    secret: 'absence_secret',
-    resave: false,
-    saveUninitialized: false,
-    unset: 'destroy',
-  })
-)
-
 app.use(passport.initialize())
-app.use(passport.session())
 
 initializePassport(passport)
 
-app.get("/user", ensureAuthenticated, errorHandler(getUser))
+app.get("/user", passport.authenticate('jwt'), errorHandler(getUser))
 app.post("/user", errorHandler(createUser))
-app.put("/user", ensureAuthenticated, errorHandler(updateUser))
-app.post("/login", passport.authenticate("local"), (req, res) => res.status(200).json(req.user.token))
+app.put("/user", passport.authenticate('jwt'), errorHandler(updateUser))
+app.post("/login", errorHandler(loginUser))
 
-app.get("/quizz/:id?", ensureAuthenticated, errorHandler(getQuizz))
-app.post("/quizz", ensureAuthenticated, errorHandler(createQuizz))
-app.put("/quizz/:id", ensureAuthenticated, errorHandler(updateQuizz))
+app.get("/quizz/:id?", passport.authenticate('jwt'), errorHandler(getQuizz))
+app.post("/quizz", passport.authenticate('jwt'), errorHandler(createQuizz))
+app.put("/quizz/:id", passport.authenticate('jwt'), errorHandler(updateQuizz))
 
-app.post("/take-quizz", ensureAuthenticated, errorHandler(createTakeQuizz))
-app.get("/take-quizz", ensureAuthenticated, errorHandler(getTakeQuizz))
+app.post("/take-quizz", passport.authenticate('jwt'), errorHandler(createTakeQuizz))
+app.get("/take-quizz", passport.authenticate('jwt'), errorHandler(getTakeQuizz))
 
 app.use(errorUse)
 
