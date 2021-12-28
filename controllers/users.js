@@ -56,18 +56,10 @@ const login = async (req, res, next) => {
   })
 }
 
-const strategyLogin = async (jwt_payload, done) => {
-  User.findOne({ _id: jwt_payload.id, username: jwt_payload.username }, (err, user) => {
-    done(err, user ? { _id: user._id, username: user.username } : false)
-  })
-}
+const passportUserFound = done => (err, user) => done(err, user ? { _id: user._id, username: user.username } : false)
 
-const findById = async (id, done) => {
-  User.findOne({ _id: id }, (err, user) => {
-    if (err) return done(err, false)
+const strategyLogin = async (jwt_payload, done) => User.findOne({ _id: jwt_payload.id, username: jwt_payload.username }, passportUserFound(done)).catch(e => { })
 
-    done(null, user ? { _id: user._id, username: user.username } : false)
-  })
-}
+const findById = async (id, done) => User.findOne({ _id: id }, passportUserFound(done)).catch(e => { })
 
 module.exports = { get, create, put, login, strategyLogin, findById }

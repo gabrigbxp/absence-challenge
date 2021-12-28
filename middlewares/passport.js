@@ -9,7 +9,7 @@ const opts = {
 }
 
 const initializePassport = passport => {
-  passport.use(new JwtStrategy(opts, errorHandler(strategyLogin)))
+  passport.use(new JwtStrategy(opts, strategyLogin))
 
   passport.serializeUser((user, done) => {
     done(null, user._id)
