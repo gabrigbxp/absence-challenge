@@ -7,8 +7,8 @@ const { errorUse } = require('./middlewares/errorHandler')
 const initializePassport = require('./middlewares/passport')
 const BusinessError = require('./errors/BusinessError')
 const apiUserRoutes = require("./api_routes/user")
-const apiQuizzRoutes = require("./api_routes/quizz")
-const apiTakeQuizzRoutes = require("./api_routes/take-quizz")
+const apiQuizRoutes = require("./api_routes/quiz")
+const apiQuizAttemptRoutes = require("./api_routes/quizAttempt")
 
 console.debug("=====================================")
 
@@ -22,8 +22,8 @@ app.use(passport.initialize())
 initializePassport(passport)
 
 app.use("/api", apiUserRoutes)
-app.use("/api", passport.authenticate('jwt'), apiQuizzRoutes)
-app.use("/api", passport.authenticate('jwt'), apiTakeQuizzRoutes)
+app.use("/api", passport.authenticate('jwt'), apiQuizRoutes)
+app.use("/api", passport.authenticate('jwt'), apiQuizAttemptRoutes)
 
 app.use((_req, _res, next) => next(new BusinessError(400, "Endpoint not found")))
 

@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose")
 const BusinessError = require("../errors/BusinessError")
 const AnswerSchema = require("./answer")
 
-const QuizzSchema = new Schema({
+const QuizSchema = new Schema({
   title: { type: String, required: true },
   user: { type: Schema.Types.ObjectId, ref: 'user', required: true },
   questions: [{
@@ -13,8 +13,8 @@ const QuizzSchema = new Schema({
   }],
 })
 
-QuizzSchema.pre("validate", function (next) {
-  if (!this.questions.length) return next(new BusinessError(400, "Quizz need at least 1 question"))
+QuizSchema.pre("validate", function (next) {
+  if (!this.questions.length) return next(new BusinessError(400, "Quiz need at least 1 question"))
 
   for (let question of this.questions) {
     let oneTrue = false, oneFalse = false
@@ -32,4 +32,4 @@ QuizzSchema.pre("validate", function (next) {
   next()
 })
 
-module.exports = model("quizz", QuizzSchema)
+module.exports = model("quiz", QuizSchema)
