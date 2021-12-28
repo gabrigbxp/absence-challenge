@@ -24,7 +24,7 @@ const create = async (req, res, next) => {
       score += auxAnswer.isCorrect ? auxAnswer.score : 0
     }
 
-    allCorrect && (score += question.score)
+    allCorrect && (score += auxQuestion.score)
   }
 
   const takeQuizz = new TakeQuizz({ ...req.body, user: req.user._id, score })

@@ -21,7 +21,7 @@ const create = async (req, res, next) => {
   const quizz = new Quizz({ ...req.body, user: req.user._id })
 
   quizz.save(err => {
-    if (err) return next(new BusinessError(400, "Quizz already exists"))
+    if (err) return next(err)
     res.status(200).json(quizz)
   })
 }
