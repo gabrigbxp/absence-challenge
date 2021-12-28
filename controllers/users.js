@@ -63,7 +63,7 @@ const strategyLogin = async (jwt_payload, done) => {
 }
 
 const findById = async (id, done) => {
-  User.findOne({ id }, (err, user) => {
+  User.findOne({ _id: id }, (err, user) => {
     if (err) return done(err, false)
 
     done(null, user ? { _id: user._id, username: user.username } : false)
