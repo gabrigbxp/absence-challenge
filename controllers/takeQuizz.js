@@ -1,4 +1,5 @@
 const TakeQuizz = require("../models/takeQuizz")
+const Quizz = require("../models/quizz")
 const BusinessError = require("../errors/BusinessError")
 
 const create = async (req, res, next) => {
@@ -33,7 +34,21 @@ const get = async (req, res, next) => {
 
   if (!takeQuizz.length) return next(new BusinessError(404, "No quizz taken by current user"))
 
-  res.status(200).json(takeQuizz)
+  const quizzes = {}
+
+  for (let take of takeQuizz) {
+    const quizzId = take.quizz
+
+    if (!quizzes[quizzId]) {
+      const quizz = await Quizz.findOne({ _id: quizzId })
+      quizzes[quizzId] = { title: quizz.title, scores: [], attempts: 0 }
+    }
+
+    quizzes[quizzId].scores.push(take.score)
+    quizzes[quizzId].attempts++
+  }
+
+  res.status(200).json(Object.keys(quizzes).map(index => quizzes[index]))
 }
 
 module.exports = { create, get }
