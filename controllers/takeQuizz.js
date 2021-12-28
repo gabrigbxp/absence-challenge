@@ -13,13 +13,18 @@ const create = async (req, res, next) => {
 
     if (!auxQuestion) return next(new BusinessError(404, "Question not found"))
 
+    let allCorrect = true
+
     for (let answer of question.answers) {
       const auxAnswer = auxQuestion.answers.id(answer)
 
       if (!auxAnswer) return next(new BusinessError(404, `Answer with id "${answer}" not found`))
 
+      !auxAnswer.isCorrect && (allCorrect = false)
       score += auxAnswer.isCorrect ? auxAnswer.score : 0
     }
+
+    allCorrect && (score += question.score)
   }
 
   const takeQuizz = new TakeQuizz({ ...req.body, user: req.user._id, score })
@@ -44,8 +49,9 @@ const get = async (req, res, next) => {
       let maxScore = 0
 
       for (let questions of quizz.questions) {
+        maxScore += questions.score
         for (let answer of questions.answers) {
-          maxScore = answer.score
+          maxScore += answer.score
         }
       }
 

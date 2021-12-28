@@ -8,6 +8,7 @@ const QuizzSchema = new Schema({
   questions: [{
     title: { type: String, required: true },
     multipleChoice: { type: Boolean, required: true },
+    score: { type: Number, default: 0 },
     answers: [AnswerSchema]
   }],
 })
