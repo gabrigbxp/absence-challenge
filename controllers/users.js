@@ -1,11 +1,11 @@
-require('dotenv').config();
+require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const User = require("../models/users")
 const BusinessError = require("../errors/BusinessError")
 const encrypt = require("../utils/encrypt")
 
 const get = async (req, res) => {
-  res.status(200).json({ _id: req.user._id, username: req.user.username })
+  res.status(200).json(req.user)
 }
 
 const create = async (req, res, next) => {
@@ -45,10 +45,9 @@ const login = async (req, res, next) => {
       if (err) return next(err)
 
       if (isMatch) {
-        const payload = { id: user._id, username };
-        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        const payload = { id: user._id, username }
+        const token = jwt.sign(payload, process.env.JWT_SECRET)
 
-        user.token = token
         user.save(err => err ? next(err) : res.status(200).json({ token }))
       } else {
         next(e404)
@@ -59,16 +58,16 @@ const login = async (req, res, next) => {
 
 const strategyLogin = async (jwt_payload, done) => {
   User.findOne({ _id: jwt_payload.id, username: jwt_payload.username }, (err, user) => {
-    done(err, user ?? false)
+    done(err, user ? { _id: user._id, username: user.username } : false)
   })
 }
 
-const findByToken = async (token, done) => {
-  User.findOne({ token }, (err, user) => {
+const findById = async (id, done) => {
+  User.findOne({ id }, (err, user) => {
     if (err) return done(err, false)
 
-    done(null, user ?? false)
+    done(null, user ? { _id: user._id, username: user.username } : false)
   })
 }
 
-module.exports = { get, create, put, login, strategyLogin, findByToken }
+module.exports = { get, create, put, login, strategyLogin, findById }

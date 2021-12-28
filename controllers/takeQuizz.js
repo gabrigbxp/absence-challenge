@@ -41,11 +41,18 @@ const get = async (req, res, next) => {
 
     if (!quizzes[quizzId]) {
       const quizz = await Quizz.findOne({ _id: quizzId })
-      quizzes[quizzId] = { title: quizz.title, scores: [], attempts: 0 }
+      let maxScore = 0
+
+      for (let questions of quizz.questions) {
+        for (let answer of questions.answers) {
+          maxScore = answer.score
+        }
+      }
+
+      quizzes[quizzId] = { title: quizz.title, maxScore, scores: [] }
     }
 
     quizzes[quizzId].scores.push(take.score)
-    quizzes[quizzId].attempts++
   }
 
   res.status(200).json(Object.keys(quizzes).map(index => quizzes[index]))

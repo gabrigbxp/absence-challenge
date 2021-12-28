@@ -1,7 +1,7 @@
-require('dotenv').config();
+require('dotenv').config()
 const { errorHandler } = require('./errorHandler')
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt')
-const { strategyLogin, findByToken: findUserByToken } = require("../controllers/users")
+const { strategyLogin, findById: findUserById } = require("../controllers/users")
 
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -12,10 +12,10 @@ const initializePassport = passport => {
   passport.use(new JwtStrategy(opts, errorHandler(strategyLogin)))
 
   passport.serializeUser((user, done) => {
-    done(null, user.token)
+    done(null, user._id)
   })
 
-  passport.deserializeUser(findUserByToken)
+  passport.deserializeUser(findUserById)
 }
 
 module.exports = initializePassport
