@@ -39,12 +39,12 @@ const get = async (req, res, next) => {
 
   if (!quizAttempt.length) return next(new BusinessError(404, "No quiz attempted by current user"))
 
-  const quizes = {}
+  const quizzes = {}
 
   for (let attempt of quizAttempt) {
     const quizId = attempt.quiz
 
-    if (!quizes[quizId]) {
+    if (!quizzes[quizId]) {
       const quiz = await Quiz.findOne({ _id: quizId })
       let maxScore = 0
 
@@ -55,13 +55,13 @@ const get = async (req, res, next) => {
         }
       }
 
-      quizes[quizId] = { title: quiz.title, maxScore, scores: [] }
+      quizzes[quizId] = { title: quiz.title, maxScore, scores: [] }
     }
 
-    quizes[quizId].scores.push(attempt.score)
+    quizzes[quizId].scores.push(attempt.score)
   }
 
-  res.status(200).json(Object.keys(quizes).map(index => quizes[index]))
+  res.status(200).json(Object.keys(quizzes).map(index => quizzes[index]))
 }
 
 module.exports = { create, get }
