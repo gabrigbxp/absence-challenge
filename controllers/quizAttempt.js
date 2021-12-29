@@ -1,4 +1,4 @@
-const TakeQuiz = require("../models/quizAttempt")
+const QuizAttempt = require("../models/quizAttempt")
 const Quiz = require("../models/quiz")
 const BusinessError = require("../errors/BusinessError")
 
@@ -27,22 +27,22 @@ const create = async (req, res, next) => {
     allCorrect && (score += auxQuestion.score)
   }
 
-  const takeQuiz = new TakeQuiz({ ...req.body, user: req.user._id, score })
-  takeQuiz.save(err => {
+  const quizAttempt = new QuizAttempt({ ...req.body, user: req.user._id, score })
+  quizAttempt.save(err => {
     if (err) return next(err)
-    res.status(200).json(takeQuiz)
+    res.status(200).json(quizAttempt)
   })
 }
 
 const get = async (req, res, next) => {
-  const takeQuiz = await TakeQuiz.find({ user: req.user._id })
+  const quizAttempt = await QuizAttempt.find({ user: req.user._id })
 
-  if (!takeQuiz.length) return next(new BusinessError(404, "No quiz taken by current user"))
+  if (!quizAttempt.length) return next(new BusinessError(404, "No quiz attempted by current user"))
 
   const quizes = {}
 
-  for (let take of takeQuiz) {
-    const quizId = take.quiz
+  for (let attempt of quizAttempt) {
+    const quizId = attempt.quiz
 
     if (!quizes[quizId]) {
       const quiz = await Quiz.findOne({ _id: quizId })
@@ -58,7 +58,7 @@ const get = async (req, res, next) => {
       quizes[quizId] = { title: quiz.title, maxScore, scores: [] }
     }
 
-    quizes[quizId].scores.push(take.score)
+    quizes[quizId].scores.push(attempt.score)
   }
 
   res.status(200).json(Object.keys(quizes).map(index => quizes[index]))
